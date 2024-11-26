@@ -1,8 +1,7 @@
-package com.github.kleinsamuel.hierarchy;
+package com.github.kleinsamuel.feature;
 
 import com.github.kleinsamuel.GtfBaseData;
 import com.github.kleinsamuel.GtfConstants;
-import com.github.kleinsamuel.GtfFeature;
 
 import java.util.ArrayList;
 
@@ -12,18 +11,18 @@ public class TranscriptFeature extends GtfFeature {
 
     private ArrayList<GtfFeature> features;
 
-    public TranscriptFeature(String contig, String source, String type, int start, int end, double score, boolean isForwardStrand, int frame) {
-        this(new GtfBaseData(contig, source, type, start, end, score, isForwardStrand, frame, null));
+    public TranscriptFeature(GtfFeature gtfFeature) {
+        this(gtfFeature.getIndex(), gtfFeature.getBaseData(), false);
     }
 
     public TranscriptFeature(GtfBaseData baseData, boolean isGenerated) {
-        super(baseData);
-        this.isGenerated = isGenerated;
-        this.features = new ArrayList<>();
+        this(-1, baseData, isGenerated);
     }
 
-    public TranscriptFeature(GtfBaseData baseData) {
-        this(baseData, false);
+    public TranscriptFeature(int index, GtfBaseData baseData, boolean isGenerated) {
+        super(index, baseData);
+        this.isGenerated = isGenerated;
+        this.features = new ArrayList<>();
     }
 
     public ArrayList<GtfFeature> getFeatures() {

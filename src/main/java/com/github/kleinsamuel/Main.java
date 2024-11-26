@@ -1,17 +1,20 @@
 package com.github.kleinsamuel;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import java.nio.file.Path;
+import java.text.ParseException;
+
 public class Main {
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+//        Path p = Path.of("/home/sam/Data/reference-genomes/ensembl/113/homo_sapiens/gtf/Homo_sapiens.GRCh38.113.gtf.gz");
+        Path p = Path.of("/home/sam/Data/gobi/exonskipping/Homo_sapiens.GRCh37.67.gtf");
+
+        try {
+
+            new GtfFile(p.toFile());
+
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
         }
     }
 }

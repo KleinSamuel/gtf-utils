@@ -1,29 +1,28 @@
-package com.github.kleinsamuel.hierarchy;
+package com.github.kleinsamuel.feature;
 
 import com.github.kleinsamuel.GtfBaseData;
 import com.github.kleinsamuel.GtfConstants;
-import com.github.kleinsamuel.GtfFeature;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 public class GeneFeature extends GtfFeature {
 
-    private ArrayList<TranscriptFeature> transcripts;
     private boolean isGenerated;
 
-    public GeneFeature(String contig, String source, String type, int start, int end, double score, boolean isForwardStrand, int frame, Map<String, String> attributes) {
-        this(new GtfBaseData(contig, source, type, start, end, score, isForwardStrand, frame, attributes), false);
+    private ArrayList<TranscriptFeature> transcripts;
+
+    public GeneFeature(GtfFeature gtfFeature) {
+        this(gtfFeature.getIndex(), gtfFeature.getBaseData(), false);
     }
 
     public GeneFeature(GtfBaseData baseData, boolean isGenerated) {
-        super(baseData);
-        this.isGenerated = isGenerated;
-        this.transcripts = new ArrayList<>();
+        this(-1, baseData, isGenerated);
     }
 
-    public GeneFeature(GtfBaseData baseData) {
-        this(baseData, false);
+    public GeneFeature(int index, GtfBaseData baseData, boolean isGenerated) {
+        super(index, baseData);
+        this.isGenerated = isGenerated;
+        this.transcripts = new ArrayList<>();
     }
 
     public String getGeneId() {

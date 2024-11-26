@@ -1,18 +1,31 @@
-package com.github.kleinsamuel;
+package com.github.kleinsamuel.feature;
+
+import com.github.kleinsamuel.GtfBaseData;
 
 import java.util.Map;
 
 public class GtfFeature {
 
+    // index of the feature in the list of features
+    private int index = -1;
     private GtfBaseData baseData;
 
-    public GtfFeature(String contig, String source, String type, int start, int end, Double score,
+    public GtfFeature(int index, String contig, String source, String type, int start, int end, Double score,
                       boolean isForwardStrand, Integer frame, Map<String, String> attributes) {
-        this(new GtfBaseData(contig, source, type, start, end, score, isForwardStrand, frame, attributes));
+        this(index, new GtfBaseData(contig, source, type, start, end, score, isForwardStrand, frame, attributes));
     }
 
-    public GtfFeature(GtfBaseData baseData) {
+    public GtfFeature(int index, GtfBaseData baseData) {
+        this.index = index;
         this.baseData = baseData;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 
     public GtfBaseData getBaseData() {
