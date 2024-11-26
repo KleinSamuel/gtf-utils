@@ -1,0 +1,76 @@
+package com.github.kleinsamuel.hierarchy;
+
+import com.github.kleinsamuel.GtfBaseData;
+import com.github.kleinsamuel.GtfConstants;
+import com.github.kleinsamuel.GtfFeature;
+
+import java.util.ArrayList;
+
+public class TranscriptFeature extends GtfFeature {
+
+    private boolean isGenerated;
+
+    private ArrayList<GtfFeature> features;
+
+    public TranscriptFeature(String contig, String source, String type, int start, int end, double score, boolean isForwardStrand, int frame) {
+        this(new GtfBaseData(contig, source, type, start, end, score, isForwardStrand, frame, null));
+    }
+
+    public TranscriptFeature(GtfBaseData baseData, boolean isGenerated) {
+        super(baseData);
+        this.isGenerated = isGenerated;
+        this.features = new ArrayList<>();
+    }
+
+    public TranscriptFeature(GtfBaseData baseData) {
+        this(baseData, false);
+    }
+
+    public ArrayList<GtfFeature> getFeatures() {
+        return features;
+    }
+
+    public ArrayList<GtfFeature> getFeatures(String type) {
+        return features.stream()
+                .filter(f -> f.getBaseData().getType().equals(type))
+                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+    }
+
+    public void setFeatures(ArrayList<GtfFeature> features) {
+        this.features = features;
+    }
+
+    public boolean isGenerated() {
+        return isGenerated;
+    }
+
+    public void setGenerated(boolean generated) {
+        isGenerated = generated;
+    }
+
+    public String getTranscriptId() {
+        return this.getBaseData().getAttribute(GtfConstants.TRANSCRIPT_ID_ATTRIBUTE_KEY);
+    }
+
+    /**
+     * Sorts the features of this transcript by start and end position (if start is equal).
+     */
+    public void sortFeatures() {
+        this.features = features.stream().sorted((o1, o2) -> {
+            if (o1.getBaseData().getStart() == o2.getBaseData().getStart()) {
+                return Integer.compare(o1.getBaseData().getEnd(), o2.getBaseData().getEnd());
+            } else {
+                return Integer.compare(o1.getBaseData().getStart(), o2.getBaseData().getStart());
+            }
+        }).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+    }
+
+    @Override
+    public String toString() {
+        return "TranscriptFeature{" +
+                "numFeatures=" + features.size() +
+                ", isGenerated=" + isGenerated +
+                ", baseData=" + this.getBaseData() +
+                '}';
+    }
+}
