@@ -29,6 +29,16 @@ public class Report {
         errors.get(featureIndex).add(error);
     }
 
+    public int getErrors() {
+        return this.errors.values()
+                .stream().flatMap(ArrayList::stream).filter(GtfError::isError).mapToInt(e -> 1).sum();
+    }
+
+    public int getWarnings() {
+        return this.errors.values()
+                .stream().flatMap(ArrayList::stream).filter(GtfError::isWarning).mapToInt(e -> 1).sum();
+    }
+
     public void printTimer() {
         System.out.println("### RUNTIME ###");
         System.out.printf("Total:\t\t\t\t\t%s\n", Timer.formatDuration(timer.total));

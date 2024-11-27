@@ -36,22 +36,27 @@ public class GtfFile {
         Instant timeStart = Instant.now();
 
         this.readLines(gtfFile);
-        this.parseHeader();
         this.parseLines();
         this.groupFeatures();
         this.checkFeatureBounds();
 
         Duration d = Duration.between(timeStart, Instant.now());
         this.report.timer.addTotal(d);
+    }
 
-        this.report.printTimer();
-        this.report.printSummary();
-        this.report.printErrors();
-        this.report.printWarnings();
+    public ArrayList<String> getHeaderLines() {
+        return headerLines;
     }
 
     public Report getReport() {
         return report;
+    }
+
+    public void printReport() {
+        this.report.printTimer();
+        this.report.printSummary();
+        this.report.printErrors();
+        this.report.printWarnings();
     }
 
     public GeneFeature getGeneFeature(String geneId) {
@@ -97,29 +102,6 @@ public class GtfFile {
         } catch (IOException e) {
             throw new ParseException(e.getMessage(), 0);
         }
-    }
-
-    private void parseHeader() {
-
-        this.headerAttributes = new HashMap<>();
-
-        headerLines.stream()
-                .filter(s -> s.contains(GtfConstants.KEY_VALUE_SEPARATOR))
-                .map(s -> s.split(GtfConstants.KEY_VALUE_SEPARATOR))
-                .forEach(s -> {
-                    if (s.length != 2) {
-                        System.out.println("Header line does not contain exactly one key-value pair: " + Arrays.toString(s));
-                        return;
-                    }
-                    String key = s[0];
-                    if (key.startsWith(GtfConstants.COMMENT_START)) {
-                        key = key.substring(1);
-                    }
-                    if (key.startsWith("!")) {
-                        key = key.substring(1);
-                    }
-                    this.headerAttributes.put(key, s[1]);
-                });
     }
 
     private void parseLines() {
