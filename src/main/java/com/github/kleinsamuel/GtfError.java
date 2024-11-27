@@ -23,9 +23,17 @@ public enum GtfError {
     NOT_DEFAULT_TYPE(1, "Type is not default"),
 
     MALFORMED_ATTRIBUTES(0, "Attributes are malformed"),
+    MALFORMED_ATTRIBUTES_AMBIGUOUS_KEY(1, "Attributes contain ambiguous key"),
+    MALFORMED_ATTRIBUTES_TEXTUAL_VALUE_NOT_ENCLOSED(1, "Textual attribute value is not enclosed in double quotes"),
 
-    MISSING_ATTRIBUTE_GENE_ID(0, "Gene ID attribute is missing"),
-    MISSING_ATTRIBUTE_TRANSCRIPT_ID(0, "Transcript ID attribute is missing"),
+    ATTRIBUTE_GENE_ID_MISSING(1, "Gene ID attribute is missing"),
+    ATTRIBUTE_GENE_ID_AMBIGUOUS(0, "Gene ID attribute is ambiguous"),
+
+    ATTRIBUTE_TRANSCRIPT_ID_MISSING(1, "Transcript ID attribute is missing"),
+    ATTRIBUTE_TRANSCRIPT_ID_AMBIGUOUS(0, "Transcript ID attribute is ambiguous"),
+
+    ATTRIBUTE_GENE_ID_NOT_FIRST(1, "Gene ID attribute is not the first attribute"),
+    ATTRIBUTE_TRANSCRIPT_ID_NOT_SECOND(1, "Transcript ID attribute is not the second attribute"),
 
     PARENT_GENE_AND_TRANSCRIPT_MISMATCH(0, "Parent gene and transcript do not match"),
 

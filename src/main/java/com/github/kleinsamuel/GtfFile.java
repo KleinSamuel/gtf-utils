@@ -9,10 +9,7 @@ import java.io.*;
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 public class GtfFile {
@@ -61,6 +58,10 @@ public class GtfFile {
         return id2gene.get(geneId);
     }
 
+    public Set<String> getAllGeneFeatureIds() {
+        return id2gene.keySet();
+    }
+
     public void readLines(File gtfFile) throws ParseException {
         try {
             Instant timeStart = Instant.now();
@@ -79,9 +80,7 @@ public class GtfFile {
                 this.report.numTotalLines++;
 
                 if (line.startsWith("#")) {
-
                     this.report.numHeaderLines++;
-                    System.out.println("Header line: " + line);
 
                     headerLines.add(line);
                     continue;
@@ -291,20 +290,20 @@ public class GtfFile {
             HashMap<String, String> attributes = this.parseAttributes(parts[8].trim(), lineNumber);
 
             if (attributes == null) {
-                this.report.addError(i, GtfError.MISSING_ATTRIBUTE_GENE_ID);
-                this.report.addError(i, GtfError.MISSING_ATTRIBUTE_TRANSCRIPT_ID);
+                this.report.addError(i, GtfError.ATTRIBUTE_GENE_ID_MISSING);
+                this.report.addError(i, GtfError.ATTRIBUTE_TRANSCRIPT_ID_MISSING);
                 continue;
             }
 
             // all features must have a gene_id attribute
             if (!attributes.containsKey(GtfConstants.GENE_ID_ATTRIBUTE_KEY)) {
-                this.report.addError(i, GtfError.MISSING_ATTRIBUTE_GENE_ID);
+                this.report.addError(i, GtfError.ATTRIBUTE_GENE_ID_MISSING);
                 continue;
             }
             // all features except of type "gene" must have a transcript_id attribute
             if (!typeParsed.equals(GtfConfig.TYPE_GENE_DEFAULT) &&
                     !attributes.containsKey(GtfConstants.TRANSCRIPT_ID_ATTRIBUTE_KEY)) {
-                this.report.addError(i, GtfError.MISSING_ATTRIBUTE_TRANSCRIPT_ID);
+                this.report.addError(i, GtfError.ATTRIBUTE_TRANSCRIPT_ID_MISSING);
                 continue;
             }
 
@@ -318,7 +317,7 @@ public class GtfFile {
         this.report.timer.addParseLines(d);
     }
 
-    private HashMap<String, String> parseAttributes(String linePart, int lineNumber) {
+    private HashMap<String, String> parseAttributes(String linePart, int featureIndex) {
 
         HashMap<String, String> attributes = new HashMap<>();
 
@@ -326,87 +325,64 @@ public class GtfFile {
             return null;
         }
 
-        StringBuilder key = new StringBuilder();
-        StringBuilder value = new StringBuilder();
+        String[] lineParts = linePart.split(";");
 
-        // 0 = key, 1 = space sep, 2 = ", 3 = value, 4 = ", 5 = ;
-        int mode = 0;
+        for (int i = 0; i < lineParts.length; i++) {
 
-        for (int i = -1; i < linePart.length(); i++) {
-            switch (mode) {
-                case 0:
-                    if (!key.isEmpty()) {
-                        if (value.isEmpty()) {
-                            this.report.addError(lineNumber, GtfError.MALFORMED_ATTRIBUTES);
-                            return null;
-                        } else {
+            int sepIndex = lineParts[i].trim().indexOf(" ");
 
-                            String keyLower = key.toString().toLowerCase();
-
-                            if (!key.toString().equals(keyLower)) {
-                                System.out.println("Key not lowercase: " + key);
-                            }
-
-                            attributes.put(keyLower, value.toString());
-                        }
-                    } else if (!value.isEmpty()) {
-                        this.report.addError(lineNumber, GtfError.MALFORMED_ATTRIBUTES);
-                        return null;
-                    }
-
-                    key.setLength(0);
-                    value.setLength(0);
-                    mode = 1;
-                    break;
-                case 1:
-                    if (linePart.charAt(i) == ' ') {
-                        mode = 2;
-                    } else {
-                        key.append(linePart.charAt(i));
-                    }
-                    break;
-                case 2:
-                    if (linePart.charAt(i) == '"') {
-                        mode = 3;
-                    } else {
-                        this.report.addError(lineNumber, GtfError.MALFORMED_ATTRIBUTES);
-                        return null;
-                    }
-                    break;
-                case 3:
-                    if (linePart.charAt(i) == '"') {
-                        mode = 4;
-                    } else {
-                        value.append(linePart.charAt(i));
-                    }
-                    break;
-                case 4:
-                    if (linePart.charAt(i) == ';') {
-                        mode = 0;
-                    } else {
-                        this.report.addError(lineNumber, GtfError.MALFORMED_ATTRIBUTES);
-                        return null;
-                    }
-                    break;
-            }
-        }
-        if (!key.isEmpty()) {
-            if (value.isEmpty()) {
-                this.report.addError(lineNumber, GtfError.MALFORMED_ATTRIBUTES);
+            if (sepIndex == -1) {
+                this.report.addError(featureIndex, GtfError.MALFORMED_ATTRIBUTES);
                 return null;
-            } else {
-
-                String keyLower = key.toString().toLowerCase();
-
-                if (!key.toString().equals(keyLower)) {
-                    System.out.println("Key not lowercase: " + key);
-                }
-
-                attributes.put(keyLower, value.toString());
             }
-        } else if (!value.isEmpty()) {
-            this.report.addError(lineNumber, GtfError.MALFORMED_ATTRIBUTES);
-            return null;
+
+            String key = lineParts[i].trim().substring(0, sepIndex).trim();
+            String value = lineParts[i].trim().substring(sepIndex+1).trim();
+
+            if (key.isEmpty()) {
+                this.report.addError(featureIndex, GtfError.MALFORMED_ATTRIBUTES);
+                return null;
+            }
+
+            if (key.equals(GtfConstants.GENE_ID_ATTRIBUTE_KEY)) {
+                if (i != 0) {
+                    this.report.addError(featureIndex, GtfError.ATTRIBUTE_GENE_ID_NOT_FIRST);
+                }
+                if (attributes.containsKey(key) && !attributes.get(key).equals(value)) {
+                    this.report.addError(featureIndex, GtfError.ATTRIBUTE_GENE_ID_AMBIGUOUS);
+                    return null;
+                }
+            }
+            if (key.equals(GtfConstants.TRANSCRIPT_ID_ATTRIBUTE_KEY)) {
+                if (i != 1) {
+                    this.report.addError(featureIndex, GtfError.ATTRIBUTE_TRANSCRIPT_ID_NOT_SECOND);
+                }
+                if (attributes.containsKey(key) && !attributes.get(key).equals(value)) {
+                    this.report.addError(featureIndex, GtfError.ATTRIBUTE_TRANSCRIPT_ID_AMBIGUOUS);
+                    return null;
+                }
+            }
+
+            // check if the value is enclosed in double quotes and if not it must be a numeric value
+            if (value.charAt(0) != '"' || value.charAt(value.length()-1) != '"') {
+                try {
+                    Double.parseDouble(value);
+                } catch (NumberFormatException e) {
+                    this.report.addError(featureIndex, GtfError.MALFORMED_ATTRIBUTES);
+                }
+            } else {
+                // remove the quotes for quoted textual values
+                value = value.substring(1, value.length()-1);
+            }
+
+            attributes.put(key, value);
+        }
+
+        if (!attributes.containsKey(GtfConstants.GENE_ID_ATTRIBUTE_KEY)) {
+            this.report.addError(featureIndex, GtfError.ATTRIBUTE_GENE_ID_MISSING);
+        }
+        if (!attributes.containsKey(GtfConstants.TRANSCRIPT_ID_ATTRIBUTE_KEY)) {
+            this.report.addError(featureIndex, GtfError.ATTRIBUTE_TRANSCRIPT_ID_MISSING);
         }
 
         return attributes;

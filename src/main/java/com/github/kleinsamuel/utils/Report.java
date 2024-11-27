@@ -46,10 +46,22 @@ public class Report {
         int numWarnings = this.errors.values()
                 .stream().flatMap(ArrayList::stream).filter(GtfError::isWarning).mapToInt(e -> 1).sum();
 
+        int numLinesWithWarnings = this.errors.entrySet().stream()
+                .filter(e -> e.getValue()
+                        .stream().anyMatch(GtfError::isWarning))
+                .mapToInt(e -> 1).sum();
+
+        int numLinesWithErrors = this.errors.entrySet().stream()
+                .filter(e -> e.getValue()
+                        .stream().anyMatch(GtfError::isError))
+                .mapToInt(e -> 1).sum();
+
         System.out.println("### SUMMARY ###");
         System.out.printf("Total lines:\t%d\n", numTotalLines);
         System.out.printf("Header lines:\t%d\n", numHeaderLines);
         System.out.printf("Feature lines:\t%d\n", (numTotalLines - numHeaderLines));
+        System.out.printf("Lines with errors:\t%d\n", numLinesWithErrors);
+        System.out.printf("Lines with warnings:\t%d\n", numLinesWithWarnings);
         System.out.println("Errors:\t\t\t" + numErrors);
         System.out.println("Warnings:\t\t" + numWarnings);
 
