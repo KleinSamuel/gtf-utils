@@ -6,12 +6,20 @@
 
     <groupId>com.github.kleinsamuel</groupId>
     <artifactId>gtf-utils</artifactId>
-    <version>1.0</version>
+    <version>0.1</version>
 
     <properties>
         <maven.compiler.source>22</maven.compiler.source>
         <maven.compiler.target>22</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GTF Utils</name>
+            <url>https://maven.pkg.github.com/kleinsamuel/gtf-utils</url>
+        </repository>
+    </distributionManagement>
 
 </project>
