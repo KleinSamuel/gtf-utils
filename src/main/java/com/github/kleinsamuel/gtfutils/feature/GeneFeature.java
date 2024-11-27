@@ -1,6 +1,5 @@
 package com.github.kleinsamuel.gtfutils.feature;
 
-import com.github.kleinsamuel.gtfutils.GtfBaseData;
 import com.github.kleinsamuel.gtfutils.GtfConstants;
 
 import java.util.ArrayList;
@@ -26,7 +25,7 @@ public class GeneFeature extends GtfFeature {
     }
 
     public String getGeneId() {
-        return this.getBaseData().getAttribute(GtfConstants.GENE_ID_ATTRIBUTE_KEY);
+        return this.getBaseData().getAttributes(GtfConstants.GENE_ID_ATTRIBUTE_KEY).get(0);
     }
 
     public ArrayList<TranscriptFeature> getTranscripts() {

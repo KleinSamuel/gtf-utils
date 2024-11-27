@@ -1,4 +1,4 @@
-package com.github.kleinsamuel.gtfutils;
+package com.github.kleinsamuel.gtfutils.feature;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,10 +15,10 @@ public class GtfBaseData {
     private Double score;
     private boolean isForwardStrand;
     private Integer frame;
-    private Map<String, String> attributes;
+    private Map<String, List<String>> attributes;
 
     public GtfBaseData(String contig, String source, String type, int start, int end, Double score,
-                       boolean isForwardStrand, Integer frame, Map<String, String> attributes) {
+                       boolean isForwardStrand, Integer frame, Map<String, List<String>> attributes) {
         this.contig = contig;
         this.source = source;
         this.type = type;
@@ -100,15 +100,15 @@ public class GtfBaseData {
         this.frame = frame;
     }
 
-    public Map<String, String> getAttributes() {
-        return attributes;
-    }
-
-    public void setAttributes(Map<String, String> attributes) {
+    public void setAttributes(Map<String, List<String>> attributes) {
         this.attributes = attributes;
     }
 
-    public String getAttribute(String key) {
+    public Map<String, List<String>> getAttributes() {
+        return attributes;
+    }
+
+    public List<String> getAttributes(String key) {
         return attributes.get(key);
     }
 
@@ -117,8 +117,14 @@ public class GtfBaseData {
                 .collect(Collectors.toSet());
     }
 
-    public static Map<String, String> copyAttributesSafely(final Map<String, String> attributes) {
-        final Map<String, String> modifiableDeepMap = new LinkedHashMap<>(attributes);
+    public static Map<String, List<String>> copyAttributesSafely(final Map<String, List<String>> attributes) {
+        final Map<String, List<String>> modifiableDeepMap = new LinkedHashMap<>();
+
+        for (final Map.Entry<String, List<String>> entry : attributes.entrySet()) {
+            final List<String> unmodifiableDeepList = List.copyOf(entry.getValue());
+            modifiableDeepMap.put(entry.getKey(), unmodifiableDeepList);
+        }
+
         return Collections.unmodifiableMap(modifiableDeepMap);
     }
 

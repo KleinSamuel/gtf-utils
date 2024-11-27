@@ -1,6 +1,7 @@
 package com.github.kleinsamuel.gtfutils;
 
 import com.github.kleinsamuel.gtfutils.feature.GeneFeature;
+import com.github.kleinsamuel.gtfutils.feature.GtfBaseData;
 import com.github.kleinsamuel.gtfutils.feature.GtfFeature;
 import com.github.kleinsamuel.gtfutils.feature.TranscriptFeature;
 import com.github.kleinsamuel.gtfutils.utils.Report;
@@ -269,7 +270,7 @@ public class GtfFile {
                 }
             }
 
-            HashMap<String, String> attributes = this.parseAttributes(parts[8].trim(), lineNumber);
+            HashMap<String, List<String>> attributes = this.parseAttributes(parts[8].trim(), lineNumber);
 
             if (attributes == null) {
                 this.report.addError(i, GtfError.ATTRIBUTE_GENE_ID_MISSING);
@@ -299,9 +300,9 @@ public class GtfFile {
         this.report.timer.addParseLines(d);
     }
 
-    private HashMap<String, String> parseAttributes(String linePart, int featureIndex) {
+    private HashMap<String, List<String>> parseAttributes(String linePart, int featureIndex) {
 
-        HashMap<String, String> attributes = new HashMap<>();
+        HashMap<String, List<String>> attributes = new HashMap<>();
 
         if (linePart == null || linePart.isEmpty()) {
             return null;
@@ -357,7 +358,11 @@ public class GtfFile {
                 value = value.substring(1, value.length()-1);
             }
 
-            attributes.put(key, value);
+            if (!attributes.containsKey(key)) {
+                attributes.put(key, new ArrayList<>());
+            }
+
+            attributes.get(key).add(value);
         }
 
         if (!attributes.containsKey(GtfConstants.GENE_ID_ATTRIBUTE_KEY)) {
@@ -386,7 +391,7 @@ public class GtfFile {
 
             if (feature.getBaseData().getType().equals(GtfConfig.TYPE_GENE_DEFAULT)) {
 
-                String geneId = feature.getBaseData().getAttribute(GtfConstants.GENE_ID_ATTRIBUTE_KEY);
+                String geneId = feature.getBaseData().getAttributes(GtfConstants.GENE_ID_ATTRIBUTE_KEY).get(0);
 
                 if (this.id2gene.containsKey(geneId)) {
                     this.report.addError(i, GtfError.DUPLICATE_GENE_ENTRY);
@@ -398,7 +403,7 @@ public class GtfFile {
 
             } else if (feature.getBaseData().getType().equals(GtfConfig.TYPE_TRANSCRIPT_DEFAULT)) {
 
-                String transcriptId = feature.getBaseData().getAttribute(GtfConstants.TRANSCRIPT_ID_ATTRIBUTE_KEY);
+                String transcriptId = feature.getBaseData().getAttributes(GtfConstants.TRANSCRIPT_ID_ATTRIBUTE_KEY).get(0);
 
                 if (this.id2transcript.containsKey(transcriptId)) {
                     this.report.addError(i, GtfError.DUPLICATE_TRANSCRIPT_ENTRY);
@@ -410,7 +415,7 @@ public class GtfFile {
 
             } else {
 
-                String transcriptId = feature.getBaseData().getAttribute(GtfConstants.TRANSCRIPT_ID_ATTRIBUTE_KEY);
+                String transcriptId = feature.getBaseData().getAttributes(GtfConstants.TRANSCRIPT_ID_ATTRIBUTE_KEY).get(0);
 
                 if (!transcriptId2child.containsKey(transcriptId)) {
                     transcriptId2child.put(transcriptId, new ArrayList<>());
@@ -427,7 +432,7 @@ public class GtfFile {
             String parentGeneId = null;
 
             if (parentTranscript != null) {
-                parentGeneId = parentTranscript.getBaseData().getAttribute(GtfConstants.GENE_ID_ATTRIBUTE_KEY);
+                parentGeneId = parentTranscript.getBaseData().getAttributes(GtfConstants.GENE_ID_ATTRIBUTE_KEY).get(0);
 
                 parentGene = this.id2gene.get(parentGeneId);
 
@@ -441,7 +446,7 @@ public class GtfFile {
             // check if all child features have the same gene id as parent
             for (GtfFeature feature : transcriptId2child.get(transcriptId)) {
 
-                String geneId = feature.getBaseData().getAttribute(GtfConstants.GENE_ID_ATTRIBUTE_KEY);
+                String geneId = feature.getBaseData().getAttributes(GtfConstants.GENE_ID_ATTRIBUTE_KEY).get(0);
 
                 if (parentGeneId == null) {
                     parentGeneId = geneId;
@@ -503,10 +508,10 @@ public class GtfFile {
 
     private GeneFeature generateDummyGeneFeature(GtfFeature baseFeature) {
 
-        HashMap<String, String> geneAttributes = new HashMap<>();
+        HashMap<String, List<String>> geneAttributes = new HashMap<>();
 
         for (String key : baseFeature.getBaseData().getAttributeKeys("gene")) {
-            geneAttributes.put(key, baseFeature.getBaseData().getAttribute(key));
+            geneAttributes.put(key, baseFeature.getBaseData().getAttributes(key));
         }
 
         GtfBaseData geneBaseData = new GtfBaseData(baseFeature.getBaseData().getContig(),
@@ -519,10 +524,10 @@ public class GtfFile {
 
     private TranscriptFeature generateDummyTranscriptFeature(GtfFeature baseFeature) {
 
-        HashMap<String, String> transcriptAttributes = new HashMap<>();
+        HashMap<String, List<String>> transcriptAttributes = new HashMap<>();
 
         for (String key : baseFeature.getBaseData().getAttributeKeys("transcript")) {
-            transcriptAttributes.put(key, baseFeature.getBaseData().getAttribute(key));
+            transcriptAttributes.put(key, baseFeature.getBaseData().getAttributes(key));
         }
 
         GtfBaseData transcriptBaseData = new GtfBaseData(baseFeature.getBaseData().getContig(),

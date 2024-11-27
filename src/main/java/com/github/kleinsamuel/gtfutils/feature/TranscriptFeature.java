@@ -1,6 +1,5 @@
 package com.github.kleinsamuel.gtfutils.feature;
 
-import com.github.kleinsamuel.gtfutils.GtfBaseData;
 import com.github.kleinsamuel.gtfutils.GtfConstants;
 
 import java.util.ArrayList;
@@ -48,7 +47,7 @@ public class TranscriptFeature extends GtfFeature {
     }
 
     public String getTranscriptId() {
-        return this.getBaseData().getAttribute(GtfConstants.TRANSCRIPT_ID_ATTRIBUTE_KEY);
+        return this.getBaseData().getAttributes(GtfConstants.TRANSCRIPT_ID_ATTRIBUTE_KEY).get(0);
     }
 
     /**

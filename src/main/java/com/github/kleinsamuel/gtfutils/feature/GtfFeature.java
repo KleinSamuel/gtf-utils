@@ -1,7 +1,6 @@
 package com.github.kleinsamuel.gtfutils.feature;
 
-import com.github.kleinsamuel.gtfutils.GtfBaseData;
-
+import java.util.List;
 import java.util.Map;
 
 public class GtfFeature {
@@ -11,7 +10,7 @@ public class GtfFeature {
     private GtfBaseData baseData;
 
     public GtfFeature(int index, String contig, String source, String type, int start, int end, Double score,
-                      boolean isForwardStrand, Integer frame, Map<String, String> attributes) {
+                      boolean isForwardStrand, Integer frame, Map<String, List<String>> attributes) {
         this(index, new GtfBaseData(contig, source, type, start, end, score, isForwardStrand, frame, attributes));
     }
 
