@@ -1,7 +1,7 @@
-package com.github.kleinsamuel.feature;
+package com.github.kleinsamuel.gtfutils.feature;
 
-import com.github.kleinsamuel.GtfBaseData;
-import com.github.kleinsamuel.GtfConstants;
+import com.github.kleinsamuel.gtfutils.GtfBaseData;
+import com.github.kleinsamuel.gtfutils.GtfConstants;
 
 import java.util.ArrayList;
 

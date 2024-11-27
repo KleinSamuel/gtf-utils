@@ -1,9 +1,9 @@
-package com.github.kleinsamuel;
+package com.github.kleinsamuel.gtfutils;
 
-import com.github.kleinsamuel.feature.GeneFeature;
-import com.github.kleinsamuel.feature.GtfFeature;
-import com.github.kleinsamuel.feature.TranscriptFeature;
-import com.github.kleinsamuel.utils.Report;
+import com.github.kleinsamuel.gtfutils.feature.GeneFeature;
+import com.github.kleinsamuel.gtfutils.feature.GtfFeature;
+import com.github.kleinsamuel.gtfutils.feature.TranscriptFeature;
+import com.github.kleinsamuel.gtfutils.utils.Report;
 
 import java.io.*;
 import java.text.ParseException;

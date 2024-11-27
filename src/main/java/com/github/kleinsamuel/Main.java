@@ -1,5 +1,7 @@
 package com.github.kleinsamuel;
 
+import com.github.kleinsamuel.gtfutils.GtfFile;
+
 import java.nio.file.Path;
 import java.text.ParseException;
 

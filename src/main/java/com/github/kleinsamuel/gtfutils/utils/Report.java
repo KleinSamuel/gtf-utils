@@ -1,6 +1,6 @@
-package com.github.kleinsamuel.utils;
+package com.github.kleinsamuel.gtfutils.utils;
 
-import com.github.kleinsamuel.GtfError;
+import com.github.kleinsamuel.gtfutils.GtfError;
 
 import java.util.ArrayList;
 import java.util.Comparator;

@@ -1,4 +1,4 @@
-package com.github.kleinsamuel;
+package com.github.kleinsamuel.gtfutils;
 
 import java.util.HashSet;
 import java.util.List;

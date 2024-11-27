@@ -1,6 +1,6 @@
-package com.github.kleinsamuel.feature;
+package com.github.kleinsamuel.gtfutils.feature;
 
-import com.github.kleinsamuel.GtfBaseData;
+import com.github.kleinsamuel.gtfutils.GtfBaseData;
 
 import java.util.Map;
 

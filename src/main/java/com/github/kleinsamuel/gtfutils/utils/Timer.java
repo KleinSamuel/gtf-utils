@@ -1,4 +1,4 @@
-package com.github.kleinsamuel.utils;
+package com.github.kleinsamuel.gtfutils.utils;
 
 import java.time.Duration;
 
