@@ -10,6 +10,10 @@ public class TranscriptFeature extends GtfFeature {
 
     private ArrayList<GtfFeature> features;
 
+    public TranscriptFeature() {
+        this(-1, null, false);
+    }
+
     public TranscriptFeature(GtfFeature gtfFeature) {
         this(gtfFeature.getIndex(), gtfFeature.getBaseData(), false);
     }

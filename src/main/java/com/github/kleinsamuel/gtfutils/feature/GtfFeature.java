@@ -9,6 +9,9 @@ public class GtfFeature {
     private int index = -1;
     private GtfBaseData baseData;
 
+    public GtfFeature() {
+    }
+
     public GtfFeature(int index, String contig, String source, String type, int start, int end, Double score,
                       boolean isForwardStrand, Integer frame, Map<String, List<String>> attributes) {
         this(index, new GtfBaseData(contig, source, type, start, end, score, isForwardStrand, frame, attributes));

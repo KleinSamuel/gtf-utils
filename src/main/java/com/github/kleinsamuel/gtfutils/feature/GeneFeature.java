@@ -10,6 +10,10 @@ public class GeneFeature extends GtfFeature {
 
     private ArrayList<TranscriptFeature> transcripts;
 
+    public GeneFeature() {
+        this(-1, null, false);
+    }
+
     public GeneFeature(GtfFeature gtfFeature) {
         this(gtfFeature.getIndex(), gtfFeature.getBaseData(), false);
     }
