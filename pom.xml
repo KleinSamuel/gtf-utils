@@ -6,7 +6,7 @@
 
     <groupId>com.github.kleinsamuel</groupId>
     <artifactId>gtf-utils</artifactId>
-    <version>0.4</version>
+    <version>0.5</version>
 
     <properties>
         <maven.compiler.source>22</maven.compiler.source>
