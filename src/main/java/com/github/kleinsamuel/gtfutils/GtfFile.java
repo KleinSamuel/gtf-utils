@@ -15,7 +15,8 @@ import java.util.zip.GZIPInputStream;
 
 public class GtfFile {
 
-    private final Report report;
+    private final File gtfFile;
+    private Report report;
 
     private ArrayList<String> lines;
     private ArrayList<String> headerLines;
@@ -25,19 +26,74 @@ public class GtfFile {
     private HashMap<String, Integer> attributeKeys;
     private HashMap<String, String> headerAttributes;
 
+    private HashMap<String, Integer> contig2lineIndex;
+    private int nextContigIndex;
+    private String parsedContig;
+
     private ArrayList<GtfFeature> features;
 
     private HashSet<Integer> parentIndices;
     private HashMap<String, GeneFeature> id2gene;
     private HashMap<String, TranscriptFeature> id2transcript;
 
-    public GtfFile(File gtfFile) throws ParseException {
+    public GtfFile(File gtfFile) {
+        this.gtfFile = gtfFile;
+
+        this.lines = new ArrayList<>();
         this.report = new Report();
+
+        this.featureTypes = new HashMap<>();
+        this.contigs = new HashMap<>();
+        this.attributeKeys = new HashMap<>();
+        this.headerAttributes = new HashMap<>();
+
+        this.contig2lineIndex = new HashMap<>();
+        this.nextContigIndex = 0;
+
+        this.resetContigMaps();
+    }
+
+    private void resetContigMaps() {
+        this.features = new ArrayList<>();
+        this.parentIndices = new HashSet<>();
+        this.id2gene = new HashMap<>();
+        this.id2transcript = new HashMap<>();
+    }
+
+    public void parseNextContig() throws ParseException {
+
+        if (this.lines.isEmpty()) {
+            this.readLines(gtfFile);
+        }
+
+        if (this.nextContigIndex < 0) {
+            throw new ParseException("All contigs have been parsed", 0);
+        }
+
+        Instant timeStart = Instant.now();
+
+        this.resetContigMaps();
+
+        this.nextContigIndex = this.parseLines(this.nextContigIndex);
+
+        this.groupFeatures();
+        this.checkFeatureBounds();
+
+        Duration d = Duration.between(timeStart, Instant.now());
+        this.report.timer.addParseLines(d);
+    }
+
+    public void parseAllContigs() throws ParseException {
 
         Instant timeStart = Instant.now();
 
         this.readLines(gtfFile);
-        this.parseLines();
+
+        int start = 0;
+        do {
+            start = this.parseLines(start);
+        } while (start >= 0);
+
         this.groupFeatures();
         this.checkFeatureBounds();
 
@@ -66,6 +122,10 @@ public class GtfFile {
 
     public Set<String> getAllGeneFeatureIds() {
         return id2gene.keySet();
+    }
+
+    public String getParsedContig() {
+        return parsedContig;
     }
 
     public void readLines(File gtfFile) throws ParseException {
@@ -105,17 +165,13 @@ public class GtfFile {
         }
     }
 
-    private void parseLines() {
+    private int parseLines(int startIndex) {
 
         Instant timeStart = Instant.now();
 
-        this.contigs = new HashMap<>();
-        this.featureTypes = new HashMap<>();
-        this.attributeKeys = new HashMap<>();
+        String currentContig = null;
 
-        this.features = new ArrayList<>();
-
-        for (int i = 0; i < lines.size(); i++) {
+        for (int i = startIndex; i < lines.size(); i++) {
 
             String line = lines.get(i);
             int lineNumber = this.headerLines.size() + i + 1;
@@ -136,6 +192,17 @@ public class GtfFile {
                     this.contigs.put(contig, 0);
                 }
                 this.contigs.put(contig, this.contigs.get(contig) + 1);
+            }
+
+            if (currentContig == null) {
+                currentContig = contig;
+                this.parsedContig = contig;
+            } else if (!currentContig.equals(contig)) {
+
+                Duration d = Duration.between(timeStart, Instant.now());
+                this.report.timer.addParseLines(d);
+
+                return i;
             }
 
             String source = parts[1];
@@ -298,6 +365,8 @@ public class GtfFile {
 
         Duration d = Duration.between(timeStart, Instant.now());
         this.report.timer.addParseLines(d);
+
+        return -1;
     }
 
     private HashMap<String, List<String>> parseAttributes(String linePart, int featureIndex) {
