@@ -559,7 +559,7 @@ public class GtfFile {
 
             // generate the parent gene if it does not exist
             if (parentGene == null) {
-                parentGene = this.generateDummyGeneFeature(parentTranscript);
+                parentGene = this.generateDummyGeneFeature(parentTranscript, parentGeneId);
 
                 this.id2gene.put(parentGeneId, parentGene);
             }
@@ -575,13 +575,15 @@ public class GtfFile {
         this.report.timer.addGroupFeatures(d);
     }
 
-    private GeneFeature generateDummyGeneFeature(GtfFeature baseFeature) {
+    private GeneFeature generateDummyGeneFeature(GtfFeature baseFeature, String parentGeneId) {
 
         HashMap<String, List<String>> geneAttributes = new HashMap<>();
 
         for (String key : baseFeature.getBaseData().getAttributeKeys("gene")) {
             geneAttributes.put(key, baseFeature.getBaseData().getAttributes(key));
         }
+
+        geneAttributes.computeIfAbsent(GtfConstants.GENE_ID_ATTRIBUTE_KEY, k -> Collections.singletonList(parentGeneId));
 
         GtfBaseData geneBaseData = new GtfBaseData(baseFeature.getBaseData().getContig(),
                 baseFeature.getBaseData().getSource(),
