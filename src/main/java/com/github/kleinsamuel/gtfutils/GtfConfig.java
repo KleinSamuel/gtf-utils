@@ -43,6 +43,10 @@ public class GtfConfig {
     public static HashSet<String> TYPE_UTR_SYNONYMS = new HashSet<>(List.of(new String[]{
             "UTR", "utr", "Utr"}));
 
+    public static String TYPE_INTRON_DEFAULT = "intron";
+    public static HashSet<String> TYPE_INTRON_SYNONYMS = new HashSet<>(List.of(new String[]{
+            "intron", "Intron", "INTRON"}));
+
     public static String TYPE_SELENOCYSTEINE_DEFAULT = "selenocysteine";
     public static HashSet<String> TYPE_SELENOCYSTEINE_SYNONYMS = new HashSet<>(List.of(new String[]{
             "selenocysteine", "Selenocysteine", "SELENOCYSTEINE"}));
@@ -54,6 +58,8 @@ public class GtfConfig {
             return TYPE_TRANSCRIPT_DEFAULT;
         } else if (TYPE_EXON_SYNONYMS.contains(type)) {
             return TYPE_EXON_DEFAULT;
+        } else if (TYPE_INTRON_SYNONYMS.contains(type)) {
+            return TYPE_INTRON_DEFAULT;
         } else if (TYPE_CDS_SYNONYMS.contains(type)) {
             return TYPE_CDS_DEFAULT;
         } else if (TYPE_START_CODON_SYNONYMS.contains(type)) {
