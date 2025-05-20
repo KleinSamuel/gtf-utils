@@ -78,6 +78,7 @@ public class GtfFile {
 
         this.groupFeatures();
         this.checkFeatureBounds();
+        this.inferIntrons();
 
         Duration d = Duration.between(timeStart, Instant.now());
         this.report.timer.addParseLines(d);
@@ -96,6 +97,7 @@ public class GtfFile {
 
         this.groupFeatures();
         this.checkFeatureBounds();
+        this.inferIntrons();
 
         Duration d = Duration.between(timeStart, Instant.now());
         this.report.timer.addTotal(d);
@@ -689,5 +691,40 @@ public class GtfFile {
 
         Duration d = Duration.between(timeStart, Instant.now());
         this.report.timer.addCheckFeatureBounds(d);
+    }
+
+    private void inferIntrons() {
+
+        Instant timeStart = Instant.now();
+
+        for (GeneFeature geneFeature : this.id2gene.values()) {
+
+            for (TranscriptFeature transcriptFeature : geneFeature.getTranscripts()) {
+
+                transcriptFeature.sortFeatures();
+
+                ArrayList<GtfFeature> exons = transcriptFeature.getFeatures(GtfConfig.TYPE_EXON_DEFAULT);
+
+                for (int i = 0; i < exons.size() -1 ; i++) {
+
+                    GtfBaseData baseData = new GtfBaseData(geneFeature.getBaseData().getContig(),
+                            geneFeature.getBaseData().getSource(),
+                            GtfConfig.TYPE_INTRON_DEFAULT,
+                            exons.get(i).getBaseData().getEnd()+1, exons.get(i+1).getBaseData().getStart()-1,
+                            null,
+                            geneFeature.getBaseData().isForwardStrand(),
+                            null,
+                            new HashMap<>()
+                    );
+
+                    GtfFeature intron = new GtfFeature(transcriptFeature.getFeatures().size(), baseData);
+
+                    transcriptFeature.getFeatures().add(intron);
+                }
+            }
+        }
+
+        Duration d = Duration.between(timeStart, Instant.now());
+        this.report.timer.addInferIntrons(d);
     }
 }

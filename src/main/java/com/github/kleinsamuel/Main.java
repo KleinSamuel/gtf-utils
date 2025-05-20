@@ -1,6 +1,9 @@
 package com.github.kleinsamuel;
 
+import com.github.kleinsamuel.gtfutils.GtfConfig;
 import com.github.kleinsamuel.gtfutils.GtfFile;
+import com.github.kleinsamuel.gtfutils.feature.GeneFeature;
+import com.github.kleinsamuel.gtfutils.feature.GtfFeature;
 
 import java.nio.file.Path;
 import java.text.ParseException;
@@ -21,9 +24,40 @@ public class Main {
 
             System.out.println(gtf.getAllGeneFeatureIds().size());
 
-            gtf.parseNextContig();
+//            gtf.getAllGeneFeatureIds().stream().toList().forEach(geneId -> {
+//
+//                GeneFeature geneFeature = gtf.getGeneFeature(geneId);
+//
+//                geneFeature.getTranscripts().forEach(transcript -> {
+//
+//                    if (transcript.getFeatures(GtfConfig.TYPE_EXON_DEFAULT).size() > 1) {
+//                        System.out.println(transcript.getTranscriptId());
+//                        System.exit(1);
+//                    }
+//                });
+//
+//            });
 
-            System.out.println(gtf.getAllGeneFeatureIds().size());
+            GeneFeature gene = gtf.getGeneFeature("ENSG00000306579");
+
+            gene.getTranscripts().forEach(transcript -> {
+                System.out.println(transcript.getTranscriptId());
+
+                for (GtfFeature exon : transcript.getFeatures(GtfConfig.TYPE_EXON_DEFAULT)) {
+                    System.out.println(exon.getBaseData().getStart() + "\t" + exon.getBaseData().getEnd());
+                }
+
+                System.out.println("introns");
+
+                for (GtfFeature intron : transcript.getFeatures(GtfConfig.TYPE_INTRON_DEFAULT)) {
+                    System.out.println(intron.getBaseData().getStart() + "\t" + intron.getBaseData().getEnd());
+                }
+
+            });
+
+//            gtf.parseNextContig();
+//
+//            System.out.println(gtf.getAllGeneFeatureIds().size());
 
         } catch (ParseException e) {
             throw new RuntimeException(e);
