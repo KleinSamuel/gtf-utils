@@ -10,6 +10,7 @@ public class Timer {
     public Duration groupFeatures;
     public Duration checkFeatureBounds;
     public Duration inferIntrons;
+    public Duration inferUtrs;
 
     public Timer() {
         total = Duration.ZERO;
@@ -18,6 +19,7 @@ public class Timer {
         groupFeatures = Duration.ZERO;
         checkFeatureBounds = Duration.ZERO;
         inferIntrons = Duration.ZERO;
+        inferUtrs = Duration.ZERO;
     }
 
     public void addTotal(Duration total) {
@@ -44,6 +46,10 @@ public class Timer {
         this.inferIntrons = this.inferIntrons.plus(inferIntrons);
     }
 
+    public void addInferUtrs(Duration inferUtrs) {
+        this.inferUtrs = this.inferUtrs.plus(inferUtrs);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -55,6 +61,7 @@ public class Timer {
         sb.append("Group features time: ").append(groupFeatures.toMillis()).append(" ms\n");
         sb.append("Check feature bounds time: ").append(checkFeatureBounds.toMillis()).append(" ms\n");
         sb.append("Infer introns time: ").append(inferIntrons.toMillis()).append(" ms\n");
+        sb.append("Infer UTRs time: ").append(inferUtrs.toMillis()).append(" ms\n");
 
         return sb.toString();
     }
