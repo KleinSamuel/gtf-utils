@@ -4,6 +4,7 @@ import com.github.kleinsamuel.gtfutils.feature.GeneFeature;
 import com.github.kleinsamuel.gtfutils.feature.GtfBaseData;
 import com.github.kleinsamuel.gtfutils.feature.GtfFeature;
 import com.github.kleinsamuel.gtfutils.feature.TranscriptFeature;
+import com.github.kleinsamuel.gtfutils.region.Region;
 import com.github.kleinsamuel.gtfutils.utils.Report;
 
 import java.io.*;
@@ -79,6 +80,7 @@ public class GtfFile {
         this.groupFeatures();
         this.checkFeatureBounds();
         this.inferIntrons();
+        this.inferUtr();
 
         Duration d = Duration.between(timeStart, Instant.now());
         this.report.timer.addParseLines(d);
@@ -98,6 +100,7 @@ public class GtfFile {
         this.groupFeatures();
         this.checkFeatureBounds();
         this.inferIntrons();
+        this.inferUtr();
 
         Duration d = Duration.between(timeStart, Instant.now());
         this.report.timer.addTotal(d);
@@ -726,5 +729,123 @@ public class GtfFile {
 
         Duration d = Duration.between(timeStart, Instant.now());
         this.report.timer.addInferIntrons(d);
+    }
+
+    private void inferUtr() {
+
+        Instant timeStart = Instant.now();
+
+        for (GeneFeature geneFeature : this.id2gene.values()) {
+
+            for (TranscriptFeature transcriptFeature : geneFeature.getTranscripts()) {
+
+                transcriptFeature.sortFeatures();
+
+                ArrayList<GtfFeature> cds = transcriptFeature.getFeatures(GtfConfig.TYPE_CDS_DEFAULT);
+
+                // skip this transcript as utr can only be present if there are cds
+                if (cds.isEmpty()) {
+                    continue;
+                }
+
+                ArrayList<GtfFeature> utrFive = transcriptFeature.getFeatures(GtfConfig.TYPE_FIVE_PRIME_UTR_DEFAULT);
+                ArrayList<GtfFeature> utrThree = transcriptFeature.getFeatures(GtfConfig.TYPE_THREE_PRIME_UTR_DEFAULT);
+                ArrayList<GtfFeature> utr = transcriptFeature.getFeatures(GtfConfig.TYPE_UTR_DEFAULT);
+
+                // there are already utr features present
+                if (!utrFive.isEmpty() && !utrThree.isEmpty()) {
+                    continue;
+                }
+
+                ArrayList<GtfFeature> exons = transcriptFeature.getFeatures(GtfConfig.TYPE_EXON_DEFAULT);
+
+                int cdsStart = cds.get(0).getBaseData().getStart();
+                int cdsEnd = cds.get(cds.size()-1).getBaseData().getEnd();
+
+                ArrayList<GtfFeature> stopCodons = transcriptFeature.getFeatures(GtfConfig.TYPE_STOP_CODON_DEFAULT);
+
+                if (!stopCodons.isEmpty()) {
+                    cdsEnd = stopCodons.get(stopCodons.size()-1).getBaseData().getEnd()+1;
+                }
+
+                // determine utr regions
+
+                ArrayList<Region> leftUtr = new ArrayList<>();
+                ArrayList<Region> rightUtr = new ArrayList<>();
+
+                for (int i = 0; i < exons.size(); i++) {
+
+                    GtfFeature exon = exons.get(i);
+
+                    // exon is entirely before cds
+                    if (exon.getBaseData().getEnd() <= cdsStart) {
+                        leftUtr.add(new Region(exon.getBaseData().getStart(), exon.getBaseData().getEnd()));
+                        continue;
+                    }
+                    // exon is entirely after cds
+                    if (exon.getBaseData().getStart() >= cdsEnd) {
+                        rightUtr.add(new Region(exon.getBaseData().getStart(), exon.getBaseData().getEnd()));
+                        continue;
+                    }
+                    // exon is entirely contained in cds
+                    if (exon.getBaseData().getStart() >= cdsStart && exon.getBaseData().getEnd() <= cdsEnd) {
+                        continue;
+                    }
+                    // exon contains the cds but has space to the left and right which is utr
+                    if (exon.getBaseData().getStart() < cdsStart && exon.getBaseData().getEnd() > cdsEnd) {
+                        leftUtr.add(new Region(exon.getBaseData().getStart(), cdsStart-1));
+                        rightUtr.add(new Region(cdsEnd+1, exon.getBaseData().getEnd()));
+                        continue;
+                    }
+                    // part of the exon is before cds
+                    if (exon.getBaseData().getStart() < cdsStart && exon.getBaseData().getEnd() <= cdsEnd) {
+                        leftUtr.add(new Region(exon.getBaseData().getStart(), cdsStart-1));
+                        continue;
+                    }
+                    // part of the exon is after cds
+                    if (exon.getBaseData().getStart() >= cdsStart && exon.getBaseData().getEnd() > cdsEnd) {
+                        rightUtr.add(new Region(cdsEnd+1, exon.getBaseData().getEnd()));
+                        continue;
+                    }
+                }
+
+                for (Region r : leftUtr) {
+
+                    GtfBaseData baseData = new GtfBaseData(
+                            geneFeature.getBaseData().getContig(),
+                            geneFeature.getBaseData().getSource(),
+                            transcriptFeature.getBaseData().isForwardStrand() ? GtfConfig.TYPE_FIVE_PRIME_UTR_DEFAULT : GtfConfig.TYPE_THREE_PRIME_UTR_DEFAULT,
+                            r.start(), r.end(),
+                            null,
+                            geneFeature.getBaseData().isForwardStrand(),
+                            null,
+                            new HashMap<>()
+                    );
+
+                    transcriptFeature.getFeatures().add(new GtfFeature(transcriptFeature.getFeatures().size(),
+                            baseData));
+                }
+
+                for (Region r : rightUtr) {
+
+                    GtfBaseData baseData = new GtfBaseData(
+                            geneFeature.getBaseData().getContig(),
+                            geneFeature.getBaseData().getSource(),
+                            transcriptFeature.getBaseData().isForwardStrand() ? GtfConfig.TYPE_THREE_PRIME_UTR_DEFAULT : GtfConfig.TYPE_FIVE_PRIME_UTR_DEFAULT,
+                            r.start(), r.end(),
+                            null,
+                            geneFeature.getBaseData().isForwardStrand(),
+                            null,
+                            new HashMap<>()
+                    );
+
+                    transcriptFeature.getFeatures().add(new GtfFeature(transcriptFeature.getFeatures().size(),
+                            baseData));
+                }
+            }
+        }
+
+        Duration d = Duration.between(timeStart, Instant.now());
+        this.report.timer.addInferUtrs(d);
     }
 }

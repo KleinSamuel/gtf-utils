@@ -38,19 +38,37 @@ public class Main {
 //
 //            });
 
-            GeneFeature gene = gtf.getGeneFeature("ENSG00000306579");
+//            GeneFeature gene = gtf.getGeneFeature("ENSG00000306579");
+//
+//            gene.getTranscripts().forEach(transcript -> {
+//                System.out.println(transcript.getTranscriptId());
+//
+//                for (GtfFeature exon : transcript.getFeatures(GtfConfig.TYPE_EXON_DEFAULT)) {
+//                    System.out.println(exon.getBaseData().getStart() + "\t" + exon.getBaseData().getEnd());
+//                }
+//
+//                System.out.println("introns");
+//
+//                for (GtfFeature intron : transcript.getFeatures(GtfConfig.TYPE_INTRON_DEFAULT)) {
+//                    System.out.println(intron.getBaseData().getStart() + "\t" + intron.getBaseData().getEnd());
+//                }
+//
+//            });
+
+
+            GeneFeature gene = gtf.getGeneFeature("ENSG00000157911");
 
             gene.getTranscripts().forEach(transcript -> {
                 System.out.println(transcript.getTranscriptId());
 
-                for (GtfFeature exon : transcript.getFeatures(GtfConfig.TYPE_EXON_DEFAULT)) {
-                    System.out.println(exon.getBaseData().getStart() + "\t" + exon.getBaseData().getEnd());
+                System.out.println("utr5");
+                for (GtfFeature f : transcript.getFeatures(GtfConfig.TYPE_FIVE_PRIME_UTR_DEFAULT)) {
+                    System.out.println(f.getBaseData().getStart() + "\t" + f.getBaseData().getEnd());
                 }
 
-                System.out.println("introns");
-
-                for (GtfFeature intron : transcript.getFeatures(GtfConfig.TYPE_INTRON_DEFAULT)) {
-                    System.out.println(intron.getBaseData().getStart() + "\t" + intron.getBaseData().getEnd());
+                System.out.println("utr 3");
+                for (GtfFeature f : transcript.getFeatures(GtfConfig.TYPE_THREE_PRIME_UTR_DEFAULT)) {
+                    System.out.println(f.getBaseData().getStart() + "\t" + f.getBaseData().getEnd());
                 }
 
             });
