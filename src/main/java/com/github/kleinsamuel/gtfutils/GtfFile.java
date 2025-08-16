@@ -557,7 +557,7 @@ public class GtfFile {
             // generate the parent transcript if it does not exist
             if (parentTranscript == null) {
                 GtfFeature feature = transcriptId2child.get(transcriptId).getFirst();
-                parentTranscript = this.generateDummyTranscriptFeature(feature);
+                parentTranscript = this.generateDummyTranscriptFeature(feature, parentGeneId);
 
                 this.id2transcript.put(transcriptId, parentTranscript);
             }
@@ -598,13 +598,15 @@ public class GtfFile {
         return new GeneFeature(geneBaseData, true);
     }
 
-    private TranscriptFeature generateDummyTranscriptFeature(GtfFeature baseFeature) {
+    private TranscriptFeature generateDummyTranscriptFeature(GtfFeature baseFeature, String parentGeneId) {
 
         HashMap<String, List<String>> transcriptAttributes = new HashMap<>();
 
         for (String key : baseFeature.getBaseData().getAttributeKeys("transcript")) {
             transcriptAttributes.put(key, baseFeature.getBaseData().getAttributes(key));
         }
+
+        transcriptAttributes.computeIfAbsent(GtfConstants.GENE_ID_ATTRIBUTE_KEY, k -> Collections.singletonList(parentGeneId));
 
         GtfBaseData transcriptBaseData = new GtfBaseData(baseFeature.getBaseData().getContig(),
                 baseFeature.getBaseData().getSource(),
